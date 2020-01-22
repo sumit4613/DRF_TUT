@@ -1,25 +1,42 @@
 from django.http import Http404
+from django.contrib.auth import get_user_model
 from rest_framework import status, mixins, generics, pagination
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
 from .models import Snippet
-from .serializers import SnippetSerializer
+from .serializers import SnippetSerializer, UserSerializer
+
+User = get_user_model()
 
 
-# Custom Pagination
-class CustomPagination(pagination.PageNumberPagination):
-    page_size = 5
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 
 # Generic Class Based Views
 class SnippetList(generics.ListCreateAPIView):
+    permission_classes = IsAuthenticatedOrReadOnly
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
-    # pagination_class = CustomPagination
+
+    def post(self, request, format=None):
+        serializer = SnippetSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(owner=self.request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = IsAuthenticatedOrReadOnly
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
 
