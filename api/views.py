@@ -1,12 +1,11 @@
-from django.http import Http404
 from django.contrib.auth import get_user_model
 from rest_framework import status, mixins, generics, pagination
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
 from .models import Snippet
 from .serializers import SnippetSerializer, UserSerializer
+from .permissions import IsOwnerOrReadOnly
 
 User = get_user_model()
 
@@ -23,9 +22,9 @@ class UserDetail(generics.RetrieveAPIView):
 
 # Generic Class Based Views
 class SnippetList(generics.ListCreateAPIView):
-    permission_classes = IsAuthenticatedOrReadOnly
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def post(self, request, format=None):
         serializer = SnippetSerializer(data=request.data)
