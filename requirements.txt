@@ -5,7 +5,7 @@ chardet==3.0.4
 colorama==0.4.3
 decorator==4.4.1
 Django==2.2.10
-djangorestframework==3.11.0
+djangorestframework==3.11.2
 httpie==2.0.0
 idna==2.8
 ipython==7.11.1
